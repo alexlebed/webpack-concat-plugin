@@ -1,4 +1,4 @@
-# webpack-concat-plugin
+# @alexlebed/webpack-concat-plugin
 
 [![Build Status](https://img.shields.io/travis/hxlniada/webpack-concat-plugin.svg)](https://travis-ci.org/hxlniada/webpack-concat-plugin)
 [![npm package](https://img.shields.io/npm/v/webpack-concat-plugin.svg)](https://www.npmjs.org/package/webpack-concat-plugin)
@@ -25,7 +25,7 @@ npm install @alexlebed/webpack-concat-plugin --save-dev
 ### Usage
 
 ```javascript
-const ConcatPlugin = require('webpack-concat-plugin');
+const ConcatPlugin = require('@alexlebed/webpack-concat-plugin');
 
 new ConcatPlugin({
     ...see options
