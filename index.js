@@ -118,7 +118,7 @@ class ConcatPlugin {
         const relativePathArrayPromise = this.getRelativePathAsync(compiler.options.context);
 
         this.filesToConcatAbsolutePromise = new Promise((resolve, reject) => {
-            compiler.resolverFactory.plugin('resolver normal', resolver => {
+          compiler.resolverFactory.hooks.resolver.for('normal').tap('resolver', (resolver) => {
                 resolve(relativePathArrayPromise
                     .then(relativeFilePathArray =>
                         Promise.all(relativeFilePathArray.map(relativeFilePath =>
@@ -266,16 +266,26 @@ class ConcatPlugin {
         const self = this;
 
         const dependenciesChanged = (compilation, filesToConcatAbsolute) => {
-            const fileTimestampsKeys = Object.keys(compilation.fileTimestamps);
-            // Since there are no time stamps, assume this is the first run and emit files
+            if (!compilation.fileTimestamps) {
+               return true;
+           }
+
+           const fileTimestampsKeys = Array.from(compilation.fileTimestamps.keys());
+
             if (!fileTimestampsKeys.length) {
                 return true;
             }
-            const changed = fileTimestampsKeys.filter(watchfile =>
-                (self.prevTimestamps[watchfile] || self.startTime) < (compilation.fileTimestamps[watchfile] || Infinity)
-            ).some(f => filesToConcatAbsolute.includes(f));
+            const changedFiles = fileTimestampsKeys.filter(
+               file => {
+                   const start = this.prevTimestamps.get(file) || this.startTime;
+                   const end = compilation.fileTimestamps.get(file) || Infinity;
+                   return start < end;
+               }
+           );
+           
             this.prevTimestamps = compilation.fileTimestamps;
-            return changed;
+
+          return changedFiles.some(file => filesToConcatAbsolute.includes(file));
         };
 
         const processCompiling = (compilation, callback) => {
